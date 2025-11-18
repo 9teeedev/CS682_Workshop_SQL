@@ -1,41 +1,54 @@
-﻿--Student ID
+--Student ID
 --Student Name
 
 -- *********แบบฝึกหัด Basic Query #2 ***************
  
  --1. จงแสดงรหัสสินค้า ชื่อสินค้า ราคาต่อหน่วย เฉพาะสินค้าประเภท Seafood
  --แบบ Product
- 
+SELECT ProductID, ProductName, UnitPrice FROM Products P, Categories C WHERE P.CategoryID = C.CategoryID AND C.CategoryName = 'Seafood'
 --แบบ Join
-
+SELECT ProductID, ProductName, UnitPrice FROM Products P
+JOIN Categories CR ON P.CategoryID = CR.CategoryID
+WHERE CategoryName = 'Seafood'
 ---------------------------------------------------------------------
 --2.จงแสดงชื่อบริษัทลูกค้า ประเทศที่ลูกค้าอยู่ และจำนวนใบสั่งซื้อที่ลูกค้านั้น ๆ ที่รายการสั่งซื้อในปี 1997
 --แบบ Product
-
-
+SELECT CompanyName, Country, COUNT(OrderID) AS OrderCount FROM Customers C, Orders O 
+WHERE C.CustomerID = O.CustomerID AND YEAR(O.OrderDate) = '1997' GROUP BY CompanyName, Country 
 --แบบ Join
-
+SELECT C.CompanyName, C.Country, COUNT(O.OrderID) AS OrderCount FROM Customers C
+JOIN Orders O ON C.CustomerID = O.CustomerID
+WHERE YEAR(OrderDate) = '1997'
+GROUP BY C.CompanyName, C.Country
 
 ---------------------------------------------------------------------
 --3. จงแสดงรหัสสินค้า ชื่อสินค้า ราคาต่อหน่วย ชื่อบริษัทและประเทศที่จัดจำหน่ายสินค้านั้น ๆ
 --แบบ Product
-
+SELECT P.ProductID, P.ProductName, P.UnitPrice, S.CompanyName, S.Country FROM Products P, Suppliers S WHERE P.SupplierID = S.SupplierID
 --แบบ Join
-
+SELECT P.ProductID, P.ProductName, P.UnitPrice, S.CompanyName, S.Country FROM Products P JOIN Suppliers S ON P.SupplierID = S.SupplierID
 
 ---------------------------------------------------------------------
 --4. ชื่อ-นามสกุลของพนักงานขาย ตำแหน่งงาน และจำนวนใบสั่งซื้อที่แต่ละคนเป็นผู้ทำรายการขาย 
 --เฉพาะที่ทำรายการขายช่วงเดือนมกราคม-เมษายน ปี 1997 และแสดงเฉพาะพนักงานที่ทำรายการขายมากกว่า 10 ใบสั่งซื้อ 
 --แบบ Product
-
+SELECT FirstName+SPACE(3)+LastName AS EmployeeName, Title, COUNT(OrderID) NumberOrders FROM Employees E, Orders O WHERE E.EmployeeID = O.EmployeeID AND OrderDate BETWEEN '1997-01-01' AND '1997-04-30' 
+GROUP BY FirstName,LastName, Title
+Having COUNT(OrderID) > 10
 --แบบ Join
-
+SELECT FirstName+SPACE(3)+LastName AS EmployeeName, Title, COUNT(OrderID) NumberOrders FROM Employees E JOIN Orders O ON E.EmployeeID = O.EmployeeID AND OrderDate BETWEEN '1997-01-01' AND '1997-04-30' 
+GROUP BY FirstName,LastName, Title
+Having COUNT(OrderID) > 10
 ---------------------------------------------------------------------
 --5.จงแสดงรหัสสินค้า ชื่อสินค้า ยอดขายรวม(ไม่คิดส่วนลด) ของสินค้าแต่ละชนิด
 --แบบ Product
-
+SELECT P.ProductID, P.ProductName, SUM(OD.Quantity * OD.UnitPrice) Total FROM Products P, [Order Details] OD 
+WHERE P.ProductID = OD.ProductID
+GROUP BY P.ProductID, P.ProductName ORDER BY ProductID ASC
 --แบบ Join
-
+SELECT P.ProductID, P.ProductName, SUM(OD.Quantity * OD.UnitPrice) Total FROM Products P 
+JOIN [Order Details] OD ON P.ProductID = OD.ProductID
+GROUP BY P.ProductID, P.ProductName ORDER BY ProductID ASC
 ---------------------------------------------------------------------
 /*6.จงแสดงรหัสบริษัทจัดส่ง ชื่อบริษัทจัดส่ง จำนวนใบสั่งซื้อที่จัดส่งไปยังประเทศสหรัฐอเมริกา, 
 อิตาลี, สหราชอาณาจักร, แคนาดา ในเดือนมกราคม-สิงหาคม ปี 1997 */
