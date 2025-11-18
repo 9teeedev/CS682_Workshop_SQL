@@ -35,7 +35,8 @@ SELECT CategoryID, COUNT(ProductID) as NumProducts FROM Products GROUP BY Catego
 เฉพาะประเภทสินค้าที่มีรายการสินค้าอยู่ในประเภทนั้น 10 รายการขึ้นไป */
 SELECT CategoryID, COUNT(ProductID) AS ProductDount FROM Products GROUP BY CategoryID HAVING COUNT(ProductID) >= 10
 --15. แสดงชื่อประเทศและจำนวนลูกค้าที่อยู่ในแต่ละประเทศ เฉพาะประเทศที่มีลูกค้าไม่ถึง 5 ราย
-SELECT Country, COUNT() FROM Customers
+SELECT Country, COUNT(CustomerID) AS Customer FROM Customers GROUP BY Country HAVING COUNT(CustomerID) < 5
 /*16. แสดงรหัสใบสั่งซื้อและยอดสั่งซื้อรวมในแต่ละใบสั่งซื้อ เฉพาะใบสั่งซื้อที่มียอดสั่งซื้อรวมเกิน $10000
 จัดเรียงข้อมูลตามยอดสั่งซื้อรวมจากมากไปหาน้อย */
+SELECT OrderID, SUM(UnitPrice * Quantity) AS TotalPrice FROM [Order Details] GROUP BY OrderID HAVING SUM(UnitPrice * Quantity) > 10000 ORDER BY TotalPrice DESC
 
