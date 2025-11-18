@@ -1,5 +1,5 @@
---Student ID
---Student Name
+﻿--Student ID : 67040249128 
+--Student Name : Phongsathorn Lansettha
 
 -- *********แบบฝึกหัด Basic Query #2 ***************
  
@@ -53,67 +53,130 @@ GROUP BY P.ProductID, P.ProductName ORDER BY ProductID ASC
 /*6.จงแสดงรหัสบริษัทจัดส่ง ชื่อบริษัทจัดส่ง จำนวนใบสั่งซื้อที่จัดส่งไปยังประเทศสหรัฐอเมริกา, 
 อิตาลี, สหราชอาณาจักร, แคนาดา ในเดือนมกราคม-สิงหาคม ปี 1997 */
 --แบบ Product
-
+SELECT ShipperID, CompanyName, COUNT(OrderID) OrderCount FROM Orders O, Shippers S
+WHERE O.ShipVia = S.ShipperID AND ShipCountry IN ('USA', 'Italy','UK','Canada')
+AND ShippedDate BETWEEN '1997-01-01' AND '1997-08-31'
+GROUP BY ShipperID, CompanyName
 --แบบ Join
-
+SELECT ShipperID, CompanyName, COUNT(OrderID) OrderCount FROM Orders O JOIN Shippers S
+ON O.ShipVia = S.ShipperID AND ShipCountry IN ('USA', 'Italy','UK','Canada')
+AND ShippedDate BETWEEN '1997-01-01' AND '1997-08-31'
+GROUP BY ShipperID, CompanyName
 
 ---------------------------------------------------------------------
 -- *** 3 ตาราง ****
 /*7 : จงแสดงเลขเดือน ยอดสั่งซื้อรวม(ไม่คิดส่วนลด) เฉพาะรายการสั่งซื้อที่ทำรายการขายในปี 1996 
-และจัดส่งไปยังประเทศสหราชอาณาจักร,เบลเยี่ยม, โปรตุเกส */
+และจัดส่งไปยังประเทศสหราชอาณาจักร,เบลเยี่ยม, โปรตุเกส ของพนักงานขายชื่อ nancy, Davolio*/
 --แบบ Product
-
-
+SELECT MONTH(O.OrderDate) Month_no, SUM(OD.Quantity*OD.UnitPrice) Total FROM Orders O, [Order Details] OD, Employees E 
+WHERE O.OrderID = OD.OrderID AND O.EmployeeID = E.EmployeeID AND YEAR(O.OrderDate) = '1996'
+AND E.FirstName = 'Nancy' AND E.LastName = 'Davolio' AND O.ShipCountry IN ('UK', 'Belgium', 'Portugal')
+GROUP BY MONTH(O.OrderDate)
 --แบบ Join
-
+SELECT MONTH(O.OrderDate) Month_no, SUM(OD.Quantity*OD.UnitPrice) Total 
+FROM Orders O INNER JOIN [Order Details] OD
+ON O.OrderID = OD.OrderID INNER JOIN Employees E ON O.EmployeeID = E.EmployeeID
+WHERE YEAR(O.OrderDate) = '1996'
+AND E.FirstName = 'Nancy' AND E.LastName = 'Davolio' AND O.ShipCountry IN ('UK', 'Belgium', 'Portugal')
+GROUP BY MONTH(O.OrderDate)
 --------------------------------------------------------------------------------
 
 /*8 : จงแสดงข้อมูลรหัสลูกค้า ชื่อบริษัทลูกค้า และยอดรวม(ไม่คิดส่วนลด) เฉพาะใบสั่งซื้อที่ทำรายการสั่งซื้อในเดือน มค. ปี 1997 
 จัดเรียงข้อมูลตามยอดสั่งซื้อมากไปหาน้อย*/
 --แบบ Product
-
+SELECT C.CustomerID, C.CompanyName, SUM(OD.Quantity * OD.UnitPrice) Total FROM [Order Details] OD, Orders O, Customers C
+WHERE OD.OrderID = O.OrderID AND O.CustomerID = C.CustomerID 
+AND YEAR(O.ShippedDate) = '1997' AND MONTH(O.ShippedDate) = '1'
+GROUP BY C.CustomerID, C.CompanyName
+ORDER BY Total DESC;
 
 --แบบ Join
-
+SELECT C.CustomerID, C.CompanyName, SUM(OD.Quantity * OD.UnitPrice) Total FROM [Order Details] OD
+INNER JOIN Orders O ON OD.OrderID = O.OrderID
+INNER JOIN Customers C ON O.CustomerID = C.CustomerID 
+AND YEAR(O.ShippedDate) = '1997' AND MONTH(O.ShippedDate) = '1'
+GROUP BY C.CustomerID, C.CompanyName
+ORDER BY Total DESC;
 ---------------------------------------------------------------------------------
 
 /*9 : จงแสดงรหัสผู้จัดส่ง ชื่อบริษัทผู้จัดส่ง ยอดรวมค่าจัดส่ง เฉพาะรายการสั่งซื้อที่ Nancy Davolio เป็นผู้ทำรายการขาย*/
 --แบบ Product
-
-
+SELECT S.ShipperID, S.CompanyName, SUM(O.Freight) AS Freight FROM Employees E, Orders O, Shippers S
+WHERE E.EmployeeID = O.EmployeeID AND O.ShipVia = S.ShipperID
+AND E.FirstName = 'Nancy' AND E.LastName = 'Davolio'
+GROUP BY S.ShipperID, S.CompanyName
 --แบบ Join
-
+SELECT S.ShipperID, S.CompanyName, SUM(O.Freight) AS Freight FROM Employees E
+INNER JOIN Orders O ON E.EmployeeID = O.EmployeeID
+INNER JOIN Shippers S ON S.ShipperID = O.ShipVia
+WHERE E.FirstName = 'Nancy' AND E.LastName = 'Davolio'
+GROUP BY S.ShipperID, S.CompanyName
 
 ---------------------------------------------------------------------------------
 /*10 : จงแสดงข้อมูลรหัสใบสั่งซื้อ วันที่สั่งซื้อ รหัสลูกค้าที่สั่งซื้อ ประเทศที่จัดส่ง จำนวนที่สั่งซื้อทั้งหมด ของสินค้าชื่อ Tofu ในช่วงปี 1997*/
 --แบบ Product
-
+SELECT O.OrderID, O.OrderDate, O.CustomerID, O.ShipCountry, OD.Quantity AS TotalOrder 
+FROM Products P, [Order Details] OD, Orders O
+WHERE P.ProductID = OD.ProductID AND OD.OrderID = O.OrderID
+AND P.ProductName = 'Tofu' AND YEAR(O.OrderDate) = '1997'
+ORDER BY O.OrderID ASC;
 
 --แบบ Join
-
+SELECT O.OrderID, O.OrderDate, C.CompanyName, O.ShipCountry, OD.Quantity AS TotalOrder FROM Products P
+INNER JOIN [Order Details] OD ON P.ProductID = OD.ProductID  
+INNER JOIN Orders O ON OD.OrderID = O.OrderID
+INNER JOIN Customers C ON O.CustomerID = C.CustomerID
+AND P.ProductName = 'Tofu' AND YEAR(O.OrderDate) = '1997'
+ORDER BY O.OrderID ASC;
 -----------------------------------------------------------------------------
 /*11 : จงแสดงข้อมูลรหัสสินค้า ชื่อสินค้า ยอดขายรวม(ไม่คิดส่วนลด) ของสินค้าแต่ละรายการเฉพาะที่มีการสั่งซื้อในเดือน มค.-สค. ปี 1997*/
 --แบบ Product
-
+SELECT P.ProductID, P.ProductName, SUM(OD.Quantity * OD.UnitPrice) AS TotalPrice 
+FROM Products P, [Order Details] OD, Orders O
+WHERE P.ProductID = OD.ProductID AND OD.OrderID = O.OrderID
+AND O.OrderDate BETWEEN '1997-01-01' AND '1997-08-31'
+GROUP BY P.ProductID, P.ProductName
 
 --แบบ Join
-
+SELECT P.ProductID, P.ProductName, SUM(OD.Quantity * OD.UnitPrice) AS TotalPrice FROM Products P
+INNER JOIN [Order Details] OD ON P.ProductID = OD.ProductID
+INNER JOIN Orders O ON OD.OrderID = O.OrderID
+WHERE O.OrderDate BETWEEN '1997-01-01' AND '1997-08-31'
+GROUP BY P.ProductID, P.ProductName
 -----------------------------------------------------------------------------
 -- *** 4 ตาราง ****
 /*12 : จงแสดงข้อมูลรหัสประเภทสินค้า ชื่อประเภทสินค้า ยอดสั่งซื้อรวม(ไม่คิดส่วนลด) เฉพาะที่มีการจัดส่งไปประเทศสหรัฐอเมริกา ในปี 1997*/
 --แบบ Product
-
-
+SELECT C.CategoryID, C.CategoryName, SUM(OD.Quantity * OD.UnitPrice) TotalPrice
+FROM Categories C, Products P, [Order Details] OD, Orders O
+WHERE C.CategoryID = P.CategoryID AND P.ProductID = OD.ProductID AND OD.OrderID = O.OrderID
+AND O.ShipCountry = 'USA' AND YEAR(O.ShippedDate) = 1997
+GROUP BY C.CategoryID, C.CategoryName
 --แบบ Join
-
+SELECT C.CategoryID, C.CategoryName, SUM(OD.Quantity * OD.UnitPrice) TotalPrice FROM Categories C
+INNER JOIN Products P ON C.CategoryID = P.CategoryID
+INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
+INNER JOIN Orders O ON O.OrderID = OD.OrderID
+WHERE O.ShipCountry = 'USA' AND YEAR(O.ShippedDate) = 1997
+GROUP BY C.CategoryID, C.CategoryName
 ----------------------------------------------------------------------------
 /*13 : จงแสดงรหัสพนักงาน ชื่อและนามสกุล(แสดงในคอลัมน์เดียวกัน) ยอดขายรวมของพนักงานแต่ละคน เฉพาะรายการขายที่จัดส่งโดยบริษัท Speedy Express 
 ไปยังประเทศสหรัฐอเมริกา และทำการสั่งซื้อในปี 1997 */
 --แบบ Product
-
-
+SELECT E.EmployeeID, E.FirstName+SPACE(1)+E.LastName AS empName, SUM(OD.Quantity * OD.UnitPrice) SumPrice
+FROM Employees E, [Order Details] OD, Orders O, Shippers S
+WHERE E.EmployeeID = O.EmployeeID AND O.OrderID = OD.OrderID AND O.ShipVia = S.ShipperID
+AND S.CompanyName = 'Speedy Express ' AND O.ShipCountry = 'USA' AND YEAR(O.OrderDate) = '1997'
+GROUP BY E.EmployeeID, E.FirstName+SPACE(1)+E.LastName
+ORDER BY EmployeeID
 --แบบ Join
-
+SELECT E.EmployeeID, E.FirstName+SPACE(1)+E.LastName AS empName, SUM(OD.Quantity * OD.UnitPrice) SumPrice 
+FROM Employees E INNER JOIN Orders O ON E.EmployeeID = O.EmployeeID
+INNER JOIN [Order Details] OD ON OD.OrderID = O.OrderID
+INNER JOIN Shippers S ON S.ShipperID = O.ShipVia
+WHERE S.CompanyName = 'Speedy Express ' AND O.ShipCountry = 'USA' AND YEAR(O.OrderDate) = '1997'
+GROUP BY E.EmployeeID, E.FirstName, E.LastName
+ORDER BY EmployeeID
 --------------------------------------------------------------------------
 /*14 : จงแสดงรหัสสินค้า ชื่อสินค้า ยอดขายรวม เฉพาะสินค้าที่นำมาจัดจำหน่ายจากประเทศญี่ปุ่น และมีการสั่งซื้อในปี 1997 และจัดส่งไปยังประเทศสหรัฐอเมริกา */
 --แบบ Product

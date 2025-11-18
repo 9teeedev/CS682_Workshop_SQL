@@ -1,5 +1,5 @@
-﻿--Student ID
---Student Name
+﻿--Student ID : 67040249128
+--Student Name : Phongsathorn Lansettha
 
 -- *********แบบฝึกหัด Basic Query #1 ***************
 --1. แสดงข้อมูลสินค้า 10 รายการแรก
