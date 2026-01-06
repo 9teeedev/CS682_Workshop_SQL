@@ -67,7 +67,7 @@ CREATE TABLE Seat(
     SeqNo INT(11),
     FlightCode VARCHAR(10),
     CustomerName VARCHAR(100),
-    Phone VARCHAR(20)
+    Phone VARCHAR(20),
     PRIMARY KEY (SeatNo, FlightDate, SeqNo, FlightCode),
     FOREIGN KEY (FlightDate, SeqNo, FlightCode) REFERENCES FlightOperation(FlightDate, SeqNo, FlightCode)
 )
